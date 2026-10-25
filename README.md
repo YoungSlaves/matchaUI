@@ -7,6 +7,12 @@ Made by aphalia for matcha.
 
 ---
 
+## Preview
+
+![Swangy UI preview](https://raw.githubusercontent.com/YoungSlaves/matchaUI/refs/heads/main/PreviewUI.gif)
+
+---
+
 ## Files
 
 | File | Purpose |
@@ -15,9 +21,10 @@ Made by aphalia for matcha.
 | `SwangySaveManager.lua` | JSON config saving/loading + config tab. |
 | `SwangyThemeManager.lua` | 18 built-in themes + custom themes. |
 | `SwangyDemo.lua` | Example menu showing every element. |
+| `README.md` | This documentation. |
 
 For Matcha, files must live in the workspace (`C:/matcha/workspace`) because `readfile`
-is sandboxed there. Copy these four `.lua` files into it before running.
+is sandboxed there. Copy the four `.lua` files into it before running.
 
 ---
 
