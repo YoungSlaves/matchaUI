@@ -22,9 +22,10 @@ Made by aphalia for matcha.
 | `SwangyThemeManager.lua` | 18 built-in themes + custom themes. |
 | `SwangyDemo.lua` | Example menu showing every element. |
 | `README.md` | This documentation. |
+| `LLM_GUIDE.md` | Full Matcha + Swangy reference written for AI/LLM code generation. |
 
-For Matcha, files must live in the workspace (`C:/matcha/workspace`) because `readfile`
-is sandboxed there. Copy the four `.lua` files into it before running.
+Everything is loaded straight from GitHub with `httpget` + `loadstring`. Nothing is
+downloaded to disk and `readfile` is not required.
 
 ---
 
@@ -33,8 +34,17 @@ is sandboxed there. Copy the four `.lua` files into it before running.
 Top-level returns are dropped by Matcha, so the library exports a global.
 
 ```lua
-local _ = loadstring(readfile("Swangy.lua"))()
+local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
+
+local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
 local Library = _G.Swangy
+```
+
+Addons:
+
+```lua
+loadstring(httpget(BASE .. "SwangySaveManager.lua"))()
+loadstring(httpget(BASE .. "SwangyThemeManager.lua"))()
 ```
 
 `_G.Obsidian` is kept as a legacy alias.
@@ -45,10 +55,11 @@ To stop / remove everything:
 _G.Swangy:Unload()
 ```
 
-Run the demo:
+Run the demo (it fetches the library and addons itself):
 
 ```lua
-loadstring(readfile("SwangyDemo.lua"))()
+local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
+loadstring(httpget(BASE .. "SwangyDemo.lua"))()
 ```
 
 ---
@@ -56,7 +67,8 @@ loadstring(readfile("SwangyDemo.lua"))()
 ## Quick start
 
 ```lua
-local _ = loadstring(readfile("Swangy.lua"))()
+local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
+local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
 local Library = _G.Swangy
 
 local Window = Library:CreateWindow({
@@ -104,7 +116,8 @@ Methods:
 
 ```lua
 Window:AddTab("Name", "icon", "description")
-Window:Toggle(true/false)   -- open/close
+Window:SelectTab(1)          -- switch to a tab by index or Tab object
+Window:Toggle(true/false)    -- open/close
 Window:SetTitle("New")
 Window:SetPos(100, 100)
 Window:SetSize(800, 560)
@@ -145,6 +158,25 @@ t:SetValue(true)
 print(t.value)
 t:OnChanged(function(on) end)
 ```
+
+Feature switch pattern (what to do with the on/off state):
+
+```lua
+local Enabled = Group:AddToggle("Enabled", { Text = "Enable Feature", Default = false })
+Enabled:AddKeyPicker("EnabledKey", { Default = "F", Mode = "Toggle" })
+
+task.spawn(function()
+    while true do
+        if Library.Options.Enabled.value then
+            -- feature work while switched on
+        end
+        task.wait(0.1)
+    end
+end)
+```
+
+Change a switch from anywhere with `Library.Options.Enabled:SetValue(true)`.
+The keybind, the toggle, and the read above all share the same `.value`.
 
 ### Slider
 
@@ -269,7 +301,7 @@ By default the global `Duration` controls every notification. Set
 ## SaveManager
 
 ```lua
-local _ = loadstring(readfile("SwangySaveManager.lua"))()
+loadstring(httpget(BASE .. "SwangySaveManager.lua"))()
 local SaveManager = _G.SwangySaveManager
 SaveManager:SetLibrary(Library)
 SaveManager:BuildConfigSection(Tab)
@@ -304,7 +336,7 @@ The config section gives you a dropdown, a name field, `Save / Overwrite`, `Rena
 ## ThemeManager
 
 ```lua
-local _ = loadstring(readfile("SwangyThemeManager.lua"))()
+loadstring(httpget(BASE .. "SwangyThemeManager.lua"))()
 local ThemeManager = _G.SwangyThemeManager
 ThemeManager:SetLibrary(Library)
 ThemeManager:BuildConfigSection(Tab)
@@ -363,7 +395,7 @@ stack up from repeated reloads.
 - `Players` / `LocalPlayer:GetMouse()` can transiently return nil while Matcha's index
   is cold. Swangy retries and caches them so clicks recover without a reload.
 - Input is kept enabled while the menu is open so you can still move.
-- `readfile` is sandboxed to `C:/matcha/workspace`; put the four files there.
+- Load with `httpget` + `loadstring`; `readfile` is not required.
 - Loading the demo unloads any previous Swangy instance first.
 
 ---
@@ -371,7 +403,9 @@ stack up from repeated reloads.
 ## Minimal example
 
 ```lua
-local _ = loadstring(readfile("Swangy.lua"))()
+local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
+
+local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
 local Library = _G.Swangy
 
 local Window = Library:CreateWindow({ Title = "Swangy", ToggleKeybind = "RightShift" })

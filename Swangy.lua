@@ -7,7 +7,7 @@
 --   local Library = _G.Swangy
 
 local Library = {
-    Version = "1.1",
+    Version = "1.2.0",
     Options = {},
     Toggles = {},
     Sliders = {},
@@ -1838,6 +1838,18 @@ function Window:AddTab(a, icon, desc)
     if not self.activeTab then self.activeTab = tab end
     return tab
 end
+function Window:SelectTab(tab)
+    if type(tab) == "number" then tab = self.tabs[tab] end
+    if not tab or tab.window ~= self then return self end
+    if self.activeTab ~= tab then
+        if self.activeTab then self.activeTab:Hide() end
+        self.activeTab = tab
+        clearPopup()
+        focusedInput = nil
+        capturing = nil
+    end
+    return self
+end
 function Window:SetTitle(t) self.title = tostring(t) return self end
 function Window:ChangeTitle(t) return self:SetTitle(t) end
 function Window:SetFooter(t) self.footer = tostring(t) return self end
@@ -1921,11 +1933,7 @@ function Window:Render()
             text(tab.label, x + 30, ty + 11, clipText(tab.name, 16, sideW - 38), 16, active and Theme.text or Theme.subtext, active and 1 or 0.55, false, false)
             newHit(x, ty, sideW, th, {
                 press = function()
-                    if self.activeTab ~= tab then
-                        if self.activeTab then self.activeTab:Hide() end
-                        self.activeTab = tab
-                        clearPopup()
-                    end
+                    self:SelectTab(tab)
                 end,
             })
             ty = ty + th

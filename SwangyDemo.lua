@@ -1,5 +1,23 @@
 -- SwangyDemo.lua - example menu built with Swangy.lua
--- Run from the Matcha workspace: the library file must sit beside this one.
+-- Loads Swangy (and its addons) straight from GitHub with httpget + loadstring.
+
+local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
+
+local function fetchScript(name)
+    local src
+    pcall(function() src = httpget(BASE .. name) end)
+    if type(src) ~= "string" or #src < 100 then
+        error("Swangy: failed to download " .. name)
+    end
+    local fn, compileErr = loadstring(src, name)
+    if not fn then
+        error("Swangy: compile error in " .. name .. ": " .. tostring(compileErr))
+    end
+    local ok, runErr = pcall(fn)
+    if not ok then
+        error("Swangy: runtime error in " .. name .. ": " .. tostring(runErr))
+    end
+end
 
 if _G.Swangy and _G.Swangy.Unload then
     pcall(function() _G.Swangy:Unload() end)
@@ -8,14 +26,7 @@ if _G.Obsidian and _G.Obsidian ~= _G.Swangy and _G.Obsidian.Unload then
     pcall(function() _G.Obsidian:Unload() end)
 end
 
-local chunk, err = loadstring(readfile("Swangy.lua"), "Swangy")
-if not chunk then
-    error("Could not compile Swangy.lua: " .. tostring(err))
-end
-local ok, runErr = pcall(chunk)
-if not ok then
-    error("Could not run Swangy.lua: " .. tostring(runErr))
-end
+fetchScript("Swangy.lua")
 
 local Library = _G.Swangy
 if not Library then
@@ -246,16 +257,14 @@ DangerGroup:AddButton({
     end,
 })
 
-local smChunk = loadstring(readfile("SwangySaveManager.lua"), "SwangySaveManager")
-if smChunk then pcall(smChunk) end
+fetchScript("SwangySaveManager.lua")
 local SaveManager = _G.SwangySaveManager
 if SaveManager then
     SaveManager:SetLibrary(Library)
     SaveManager:BuildConfigSection(Tabs.Settings)
 end
 
-local tmChunk = loadstring(readfile("SwangyThemeManager.lua"), "SwangyThemeManager")
-if tmChunk then pcall(tmChunk) end
+fetchScript("SwangyThemeManager.lua")
 local ThemeManager = _G.SwangyThemeManager
 if ThemeManager then
     ThemeManager:SetLibrary(Library)
