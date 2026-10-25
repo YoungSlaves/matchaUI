@@ -29,6 +29,33 @@ local Library = {
         UseCallDuration = false,
     },
 }
+-- Tear down any previous Swangy instance and its raw watermark drawings so
+-- reloading cannot leave an immovable duplicate box behind.
+do
+    for _, key in ipairs({ "Swangy", "Obsidian" }) do
+        local L = _G[key]
+        if L and L.__wm then
+            pcall(function() L.__wm.bg:Remove() end)
+            pcall(function() L.__wm.txt:Remove() end)
+            L.__wm = nil
+        end
+    end
+    local prev = _G.__swangy_instances
+    if prev then
+        for _, inst in ipairs(prev) do
+            pcall(function() inst:Unload() end)
+        end
+    end
+    if _G.__swangy_wms then
+        for _, w in ipairs(_G.__swangy_wms) do
+            pcall(function() w.bg:Remove() end)
+            pcall(function() w.txt:Remove() end)
+        end
+    end
+    _G.__swangy_wms = {}
+    _G.__swangy_instances = {}
+end
+
 _G.Swangy = Library
 _G.Obsidian = Library
 
@@ -2131,14 +2158,6 @@ local function tickLoop()
         for _, win in ipairs(Windows) do
             if win.visible then anyVisible = true win:Render() end
         end
-        if anyVisible then
-            local win = Windows[1]
-            if win and win.activeTab then
-                for _, g in ipairs(win.activeTab.groups) do g:RenderPopups() end
-            end
-        end
-        Library.__hits = hitList
-        processInput()
         if watermarkOn then
             local wm = Library.__wm
             if not wm then
@@ -2147,14 +2166,44 @@ local function tickLoop()
                 wm.txt.Size = 14
                 pcall(function() wm.txt.Font = FONT wm.bg.ZIndex = 200 wm.txt.ZIndex = 201 end)
                 Library.__wm = wm
+                local reg = _G.__swangy_wms
+                reg[#reg + 1] = wm
             end
+            local cam = workspace.CurrentCamera
+            local vp = cam and cam.ViewportSize or Vector2.new(1920, 1080)
+            local pos = Library.__wmPos or { x = 10, y = 10 }
             local s = win0Text()
-            wm.bg.Position, wm.bg.Size = Vector2.new(10, 10), Vector2.new(textW(s, 14) + 16, 22)
+            local w, h = textW(s, 14) + 16, 22
+            pos.x = clamp(pos.x, 0, max(0, vp.X - w))
+            pos.y = clamp(pos.y, 0, max(0, vp.Y - h))
+            Library.__wmPos = pos
+            wm.bg.Position, wm.bg.Size = Vector2.new(pos.x, pos.y), Vector2.new(w, h)
             wm.bg.Color, wm.bg.Transparency, wm.bg.Visible = Theme.main, 0.9, true
-            wm.txt.Position, wm.txt.Text, wm.txt.Color, wm.txt.Visible = Vector2.new(18, 13), s, Theme.text, true
+            wm.txt.Position, wm.txt.Text, wm.txt.Color, wm.txt.Visible = Vector2.new(pos.x + 8, pos.y + 3), s, Theme.text, true
+            newHit(pos.x, pos.y, w, h, {
+                press = function(px, py) Library.__wmDrag = { dx = px - pos.x, dy = py - pos.y } end,
+                drag = function(px, py)
+                    local d = Library.__wmDrag
+                    if d then
+                        Library.__wmPos = {
+                            x = clamp(px - d.dx, 0, max(0, vp.X - w)),
+                            y = clamp(py - d.dy, 0, max(0, vp.Y - h)),
+                        }
+                    end
+                end,
+                release = function() Library.__wmDrag = nil end,
+            })
         elseif Library.__wm then
             Library.__wm.bg.Visible, Library.__wm.txt.Visible = false, false
         end
+        if anyVisible then
+            local win = Windows[1]
+            if win and win.activeTab then
+                for _, g in ipairs(win.activeTab.groups) do g:RenderPopups() end
+            end
+        end
+        Library.__hits = hitList
+        processInput()
         renderNotifs()
     end)
     if not ok then
@@ -2190,6 +2239,11 @@ function Library:Unload()
         Library.__wm = nil
     end
     pcall(function() MEAS:Remove() end)
+end
+
+do
+    local reg = _G.__swangy_instances
+    reg[#reg + 1] = Library
 end
 
 return Library

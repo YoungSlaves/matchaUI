@@ -341,6 +341,11 @@ The logo in the titlebar is generated from an SVG path as a black -> accent diag
 gradient and rebuilds automatically when the accent/theme changes. The window footer
 is intentionally not drawn.
 
+The top-left watermark (title + fps) is draggable. Its position is kept in
+`Library.__wmPos`, is clamped to the viewport, and is reset when the library reloads.
+Loading Swangy tears down any previous instance and its watermark, so boxes cannot
+stack up from repeated reloads.
+
 ---
 
 ## Matcha notes
