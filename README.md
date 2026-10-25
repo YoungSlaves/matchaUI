@@ -17,12 +17,12 @@ Made by aphalia for matcha.
 
 | File | Purpose |
 |---|---|
-| `Swangy.lua` | The library. Everything you load. |
+| `Library.lua` | The library. Everything you load. |
 | `SwangySaveManager.lua` | JSON config saving/loading + config tab. |
 | `SwangyThemeManager.lua` | 18 built-in themes + custom themes. |
 | `SwangyDemo.lua` | Example menu showing every element. |
 | `README.md` | This documentation. |
-| `LLM_GUIDE.md` | Full Matcha + Swangy reference written for AI/LLM code generation. |
+| `LLM.md` | Full Matcha + Swangy reference written for AI/LLM code generation. |
 
 Everything is loaded straight from GitHub with `httpget` + `loadstring`. Nothing is
 downloaded to disk and `readfile` is not required.
@@ -36,7 +36,7 @@ Top-level returns are dropped by Matcha, so the library exports a global.
 ```lua
 local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
 
-local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
+local _ = loadstring(httpget(BASE .. "Library.lua"))()
 local Library = _G.Swangy
 ```
 
@@ -68,7 +68,7 @@ loadstring(httpget(BASE .. "SwangyDemo.lua"))()
 
 ```lua
 local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
-local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
+local _ = loadstring(httpget(BASE .. "Library.lua"))()
 local Library = _G.Swangy
 
 local Window = Library:CreateWindow({
@@ -405,7 +405,7 @@ stack up from repeated reloads.
 ```lua
 local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
 
-local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
+local _ = loadstring(httpget(BASE .. "Library.lua"))()
 local Library = _G.Swangy
 
 local Window = Library:CreateWindow({ Title = "Swangy", ToggleKeybind = "RightShift" })

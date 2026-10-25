@@ -167,7 +167,7 @@ local d = Drawing.new("Square")   -- Line, Text, Image, Circle, Square, Triangle
 
 ```lua
 local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
-local _ = loadstring(httpget(BASE .. "Swangy.lua"))()   -- return is dropped
+local _ = loadstring(httpget(BASE .. "Library.lua"))()   -- return is dropped
 local Library = _G.Swangy                                -- use this
 ```
 
@@ -434,7 +434,7 @@ Library:SetMenuKey("RightShift")
 ```lua
 -- load
 local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
-local _ = loadstring(httpget(BASE .. "Swangy.lua"))()
+local _ = loadstring(httpget(BASE .. "Library.lua"))()
 local Library = _G.Swangy
 
 -- window + tab

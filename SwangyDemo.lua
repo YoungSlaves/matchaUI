@@ -1,15 +1,21 @@
--- SwangyDemo.lua - example menu built with Swangy.lua
+-- SwangyDemo.lua - example menu built with Library.lua
 -- Loads Swangy (and its addons) straight from GitHub with httpget + loadstring.
 
 local BASE = "https://raw.githubusercontent.com/YoungSlaves/matchaUI/main/"
 
-local function fetchScript(name)
-    local src
-    pcall(function() src = httpget(BASE .. name) end)
-    if type(src) ~= "string" or #src < 100 then
+local function fetchScript(name, fallback)
+    local function try(n)
+        local src
+        pcall(function() src = httpget(BASE .. n) end)
+        if type(src) == "string" and #src > 100 then return src end
+        return nil
+    end
+    local src = try(name)
+    if not src and fallback then src = try(fallback) end
+    if not src then
         error("Swangy: failed to download " .. name)
     end
-    local fn, compileErr = loadstring(src, name)
+    local fn, compileErr = loadstring(src)
     if not fn then
         error("Swangy: compile error in " .. name .. ": " .. tostring(compileErr))
     end
@@ -26,7 +32,7 @@ if _G.Obsidian and _G.Obsidian ~= _G.Swangy and _G.Obsidian.Unload then
     pcall(function() _G.Obsidian:Unload() end)
 end
 
-fetchScript("Swangy.lua")
+fetchScript("Library.lua", "Swangy.lua")
 
 local Library = _G.Swangy
 if not Library then
